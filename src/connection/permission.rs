@@ -13,6 +13,7 @@ use std::{
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Permission {
     pub name: String,
+    authtoken: String,
     permission_matrix: PermissionMatrix,
 }
 
@@ -30,10 +31,11 @@ impl Hash for Permission {
 }
 
 impl Permission {
-    pub fn new(name: String, permission_map: HashMap<String, bool>) -> Self {
+    pub fn new(name: String, permission_map: HashMap<String, bool>, authtoken: String) -> Self {
         return Permission {
             name: name,
             permission_matrix: PermissionMatrix::new(permission_map),
+            authtoken: authtoken
         };
     }
 
@@ -46,8 +48,17 @@ impl Permission {
                 .collect();
         return Permission {
             name: "default".to_string(),
+            authtoken: "".to_string(),
             permission_matrix: PermissionMatrix::new(default_permissions),
         };
+    }
+
+    pub fn root() -> Self {
+        return Permission {
+            name: "root".to_string(),
+            permission_matrix: PermissionMatrix::root(),
+            authtoken: "root".to_string()
+        }
     }
 
     fn can_use_restricted(&self, mode: &Mode) -> Result<bool, String> {

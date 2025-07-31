@@ -6,6 +6,9 @@ use serde::{Serialize, Deserialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Hash)]
 pub struct PermissionMatrix {
+    // Root
+    root: Option<bool>,
+
     //
     read: Option<bool>,
     get: Option<bool>,
@@ -35,6 +38,7 @@ impl PermissionMatrix {
         let get = |key: &str| matrix.get(key).copied();
 
         Self {
+            root: Some(false),
             read: get("read"),
             get: get("read.get"),
             exists: get("read.exists"),
@@ -56,7 +60,22 @@ impl PermissionMatrix {
         }
     }
 
+    pub fn root() -> Self {
+        let mut root = Self::new(HashMap::new());
+        root.promote_to_root();
+        root
+    }
+
+    fn promote_to_root(&mut self) {
+        self.root = Some(true);
+    } 
+
     pub fn get_permission(&self, permission: &str) -> bool {
+        // Allow everything when root
+        if self.root.unwrap_or(false) {
+            return true
+        };
+
         match permission {
             // READ
             "read" => self.read.unwrap_or(false),

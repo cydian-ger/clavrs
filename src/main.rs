@@ -52,9 +52,10 @@ fn main() {
         &command_line_args.address, mode
     );
 
-    let permissions: Permissions = Permissions::from_path(command_line_args.perm_path);
-
-    println!("{}", serde_json::to_string(&permissions).unwrap());
+    let permssions = match Permissions::from_path(command_line_args.perm_path) {
+        Ok(perms) => {perms},
+        Err(_) => {Permissions::default()},
+    };
 
     for stream in listener.incoming() {
         // TODO

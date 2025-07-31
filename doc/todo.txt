@@ -31,3 +31,20 @@ Connection ->
 //  Permission
 //   - auth (for "default" must be yes)
 //
+
+permissions:
+  root:
+    - 
+      authtoken: str
+
+  admin:
+    - 
+      authtoken: str
+      operations:
+        - *string: bool  (can be any number of strings, things like write.put: true, read: false)
+
+  user1
+    - 
+      authtoken: str
+      operations:
+        - *string: bool
