@@ -1,0 +1,24 @@
+[tasks.build-v]
+script_runner = "cmd"
+script = [
+  "for /f \"delims=\" %%i in ('powershell -Command \"(cargo metadata --no-deps --format-version 1 | ConvertFrom-Json).packages[0].name\"') do set name=%%i",
+  "for /f \"delims=\" %%i in ('powershell -Command \"(cargo metadata --no-deps --format-version 1 | ConvertFrom-Json).packages[0].version\"') do set version=%%i",
+  "echo Building %name% version %version%...",
+
+  ":: --- Windows Build ---",
+  "echo Building Windows binary",
+  "cargo build --release",
+  "if not exist target_release mkdir target_release",
+  "set win_src=target\\release\\%name%.exe",
+  "set win_dst=target_release\\%name%-%version%-windows.exe",
+  "copy /Y %win_src% %win_dst%",
+  "echo Windows binary built: %win_dst%",
+
+  ":: --- Linux Build ---",
+  "echo Building Linux binary",
+  "cross build --release --target x86_64-unknown-linux-gnu",
+  "set lin_src=target\\x86_64-unknown-linux-gnu\\release\\%name%",
+  "set lin_dst=target_release\\%name%-%version%-linux",
+  "copy /Y %lin_src% %lin_dst%",
+  "echo Linux binary built: %lin_dst%"
+]

@@ -14,9 +14,13 @@ pub fn handle_instruction(
         Err(err) => return Err(err.to_string()),
     }
 
-    permission.allow_instruction(&instruction)?;
+    permission.allow_instruction(&instruction, &connection_state)?;
 
     match instruction {
+        Instruction::Authenticate(auth) => {
+            
+        }
+
         Instruction::Transaction(transaction) => {
             let mode_is_sequence: bool = match connection_state.mode {
                 OperationMode::Default => false,

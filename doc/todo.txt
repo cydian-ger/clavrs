@@ -1,0 +1,33 @@
+Config.yaml
+
+Possible fields:
+- address
+- mode [test, default]
+- permission_path [PATH]
+- timeout
+  - last_full_message
+  - chunk
+- logging?
+- snapshot / save
+  - frequencey
+  - path
+
+
+Permissions:
+ABAC (Attribute Based Access Control)
+
+Connection ->
+  - None Permission is granted ()
+  - auth is required for more / different access
+
+
+// Permission Tree:
+//  If no leaf: use node above: Value = Option<T>
+//
+//  Operation
+//   - Write
+//   - Read
+//   - Transaction
+//  Permission
+//   - auth (for "default" must be yes)
+//

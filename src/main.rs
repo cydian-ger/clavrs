@@ -11,7 +11,7 @@ use std::{
     thread,
 };
 
-use crate::connection::{permission::Permission, permission_list::{PermissionState, PermissionList}};
+use crate::connection::{permission::Permission, permissions::Permissions};
 
 #[derive(ValueEnum, Debug, Clone)] // ArgEnum here
 #[clap(rename_all = "kebab_case")]
@@ -35,24 +35,28 @@ struct Args {
 }
 
 fn main() {
+    // COMMAND: cargo make build-v
+    // to build the file
+
+    let command_line_args = Args::parse();
+
     // Init the kernel section
     let (read, write) = evmap::new();
     let read_factory: ReadHandleFactory<String, String> = read.factory();
     let read_mutex = Arc::new(Mutex::new(write));
-
-    let command_line_args = Args::parse();
+    let mode = command_line_args.mode;
+    
     let listener = TcpListener::bind(&command_line_args.address).unwrap();
     println!(
         "Clavrs is running at {} in {:?}-Mode",
-        &command_line_args.address, &command_line_args.mode
+        &command_line_args.address, mode
     );
 
-    let permissions: PermissionList = PermissionList::from_path(command_line_args.perm_path);
+    let permissions: Permissions = Permissions::from_path(command_line_args.perm_path);
 
     println!("{}", serde_json::to_string(&permissions).unwrap());
 
     for stream in listener.incoming() {
-
         // TODO
         // Permission could be checked here, and loaded on updated file
 
@@ -62,9 +66,9 @@ fn main() {
                 let write_mutex = Arc::clone(&read_mutex);
 
                 println!("{:?}: Connection Established", stream.peer_addr().unwrap());
-
-                let db_mode = command_line_args.mode.clone();
-                thread::spawn(|| {
+                
+                let db_mode = mode.clone();
+                thread::spawn(move || {
                     // TODO
                     // authenticate connection first.
                     // if auth fail just close connection
@@ -72,7 +76,8 @@ fn main() {
                         stream,
                         read_handle,
                         write_mutex,
-                        Permission::new(&PermissionState::default(), db_mode),
+                        Permission::default(),
+                        db_mode
                     );
                 });
             }

@@ -47,9 +47,12 @@ pub fn parse_instruction(parts: Vec<Part>) -> Result<Instruction, &'static str> 
             match keyword_type {
                 KeywordType::Instruction => {
                     match keyword {
+                        // Transaction
                         Keyword::SEQEUENCE => {return Ok(Instruction::Transaction(TransactionOp::Sequence))},
                         Keyword::ABORT => {return Ok(Instruction::Transaction(TransactionOp::Abort))},
                         Keyword::EXECUTE => {return Ok(Instruction::Transaction(TransactionOp::Execute))},
+                        // Auth
+                        Keyword::AUTH => {return parse_auth(parts)}
                         _ => {}
                     }
                     return Err("Instruction does not exist")
@@ -101,7 +104,7 @@ fn match_into_value(val: Option<&Part>) -> Result<String, &'static str> {
     }
 }
 
-// READ
+// -- READ --
 // GET [KEYS]
 fn parse_get(parts: Vec<Part>) -> Result<Op, &'static str> {
     let keys: Vec<String>;
@@ -128,7 +131,7 @@ fn parse_has(parts: Vec<Part>) -> Result<Op, &'static str> {
     return Ok(Op::Read(ReadOp::Has(keys, value)));
 }
 
-// EXISTS
+// EXISTS [KEYS]
 fn parse_exists(parts: Vec<Part>) -> Result<Op, &'static str> {
     let keys: Vec<String>;
     if parts.len() != 2 {
@@ -140,9 +143,9 @@ fn parse_exists(parts: Vec<Part>) -> Result<Op, &'static str> {
     return Ok(Op::Read(ReadOp::Exists(keys)));
 }
 
-// WRITE
+// -- WRITE --
+// PUT [KEYS] [[VALUES]]
 fn parse_put(parts: Vec<Part>) -> Result<Op, &'static str> {
-    // GET: [KEYS] [[VALUES]]
     let keys: Vec<String>;
     let values: Vec<Vec<String>>;
     if parts.len() != 3 {
@@ -159,6 +162,7 @@ fn parse_put(parts: Vec<Part>) -> Result<Op, &'static str> {
     return Ok(Op::Write(WriteOp::Put(keys, values)));
 }
 
+// DELETE [KEYS]
 fn parse_delete(parts: Vec<Part>) -> Result<Op, &'static str> {
     let keys;
     if parts.len() != 2 {
@@ -170,6 +174,7 @@ fn parse_delete(parts: Vec<Part>) -> Result<Op, &'static str> {
     return Ok(Op::Write(WriteOp::Delete(keys)));
 }
 
+// CLEAR [KEYS]
 fn parse_clear(parts: Vec<Part>) -> Result<Op, &'static str> {
     let keys;
     if parts.len() != 2 {
@@ -181,6 +186,7 @@ fn parse_clear(parts: Vec<Part>) -> Result<Op, &'static str> {
     return Ok(Op::Write(WriteOp::Clear(keys)));
 }
 
+// REPLACE [KEYS] [[VALUES]]
 fn parse_replace(parts: Vec<Part>) -> Result<Op, &'static str> {
     let key;
     let values;
@@ -195,6 +201,7 @@ fn parse_replace(parts: Vec<Part>) -> Result<Op, &'static str> {
     return Ok(Op::Write(WriteOp::Replace(key, values)));
 }
 
+// RETRACT [KEYS] [[VALUES]]
 fn parse_retract(parts: Vec<Part>) -> Result<Op, &'static str> {
     let keys;
     let values;
@@ -209,6 +216,7 @@ fn parse_retract(parts: Vec<Part>) -> Result<Op, &'static str> {
     return Ok(Op::Write(WriteOp::Retract(keys, values)));
 }
 
+// PURGE
 fn parse_purge(parts: Vec<Part>) -> Result<Op, &'static str> {
     if parts.len() != 1 {
         return Err("PURGE requires no Arguments");
@@ -217,6 +225,7 @@ fn parse_purge(parts: Vec<Part>) -> Result<Op, &'static str> {
     return Ok(Op::Write(WriteOp::Purge));
 }
 
+// POP KEY
 fn parse_pop(parts: Vec<Part>) -> Result<Op, &'static str> {
     let key: String;
 
@@ -227,4 +236,17 @@ fn parse_pop(parts: Vec<Part>) -> Result<Op, &'static str> {
     load_or_err!(key, match_into_value(parts.get(1)));
 
     return Ok(Op::ReadWrite(ReadWriteOp::Pop(key)));
+}
+
+// -- AUTH --
+fn parse_auth(parts: Vec<Part>) -> Result<Instruction, &'static str> {
+    let auth: String;
+
+    if parts.len() != 2 {
+        return Err("AUTH requires 1 Argument: <Auth>")
+    }
+
+    load_or_err!(auth, match_into_value(parts.get(1)));
+
+    Ok(Instruction::Authenticate(auth))
 }

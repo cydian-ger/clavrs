@@ -18,7 +18,7 @@ use crate::{
         lex::lex,
         token::KeywordType,
         validate::{is_valid, Part},
-    },
+    }, Mode,
 };
 
 use super::permission::Permission;
@@ -40,8 +40,9 @@ pub fn handle_connection(
     read_handle: ReadHandle<String, String>,
     write_mutex: Arc<Mutex<WriteHandle<String, String>>>,
     permission: Permission,
+    db_mode: Mode,
 ) {
-    let mut connection_state = ConnectionState::new(read_handle, write_mutex);
+    let mut connection_state = ConnectionState::new(read_handle, write_mutex, db_mode);
 
     loop {
         // Continue means a recoverable error was transmitted

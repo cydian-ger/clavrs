@@ -44,6 +44,7 @@ pub enum ReadOp {
 
 pub enum Instruction {
     Transaction(TransactionOp),
+    Authenticate(String),
 }
 
 #[derive(Debug)]

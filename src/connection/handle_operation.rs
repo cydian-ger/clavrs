@@ -20,7 +20,7 @@ pub fn handle_operation(
     }
 
     // Check if the command is allowed
-    permission.allow_operation(&operation)?;
+    permission.allow_operation(&operation, connection_state)?;
 
     match connection_state.mode {
         OperationMode::Default => {

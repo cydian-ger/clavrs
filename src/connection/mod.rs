@@ -4,4 +4,5 @@ mod connection_state;
 mod handle_instruction;
 mod handle_operation;
 pub mod permission;
-pub mod permission_list;
+pub mod permissions;
+pub mod permission_matrix;

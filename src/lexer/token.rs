@@ -44,6 +44,8 @@ pub enum Keyword {
     SEQEUENCE,
     ABORT,
     EXECUTE,
+    // Authenticate
+    AUTH
 }
 
 pub fn get_keyword_token(ident: &Vec<char>) -> Result<Token, String> {
@@ -90,6 +92,8 @@ fn match_instruction(ident: &Vec<char>) -> Result<Keyword, ()> {
         "sequence" => Ok(Keyword::SEQEUENCE),
         "abort" => Ok(Keyword::ABORT),
         "execute" => Ok(Keyword::EXECUTE),
+        // Authenticate
+        "auth" => Ok(Keyword::AUTH),
         _ => {Err(())}
     }
 }
